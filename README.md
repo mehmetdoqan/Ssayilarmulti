@@ -1,37 +1,76 @@
-✨ Sihirli Sayılar Sayıları keşfet, mantığını kullan, bulmacayı çöz! Sihirli Sayılar; matematiksel düşünme, uzamsal algı, problem çözme ve mantıksal akıl yürütme becerilerini geliştirmek amacıyla tasarlanmış, tarayıcı üzerinden oynanabilen interaktif bir bulmaca oyunudur. Oyuncular, farklı şekillerdeki parçaları 5 × 5 oyun tahtasına yerleştirerek boş kalan hücreyi bulmaya çalışır.
+# Sihirli Sayılar — Çok Oyunculu MVP
 
-🎮 Özellikler 📱 Mobil uyumlu tasarım: Bilgisayar, tablet ve telefonlarda kullanılabilir. 🧩 Sürükle ve bırak: Parçaları doğrudan oyun tahtasına taşıma. 🔄 Parça düzenleme: Parçaları döndürma, aynalama ve yeniden konumlandırma. ↩️ Geri alma: Önceki hamleyi geri yükleme. 🗑️ Çöp kutusu: Yerleştirilen parçaları tahtadan kaldırma. 🎲 Sayı meydan okuması: Farklı yöntemlerle hedef sayı veya soru belirleme. ⏱️ Geri sayım: 2, 3 veya 5 dakikalık süre seçenekleri. 🔎 Cevap kontrolü: Boş hücre için seçilen cevabı kontrol etme. 🏆 Sonuç penceresi: Başarı ve yeniden deneme mesajları.
+Bu paket, mevcut Sihirli Sayılar HTML oyununa 2–4 kişilik, oda koduyla katılınan internet üzerinden yarışma prototipi ekler.
 
-🖼️ Özelleştirilebilir logo: Merkez hücrede logo.png varsa gösterilir; bulunamazsa varsayılan ❖ simgesi kullanılır.
+## Paket içeriği
 
-🔢 Sayı ve soru yöntemleri Rastgele sayı: 1–24 arasında hedef sayı belirlenir. Toplama: 1–9 arasındaki rakamlarla toplama işlemi oluşturulur. Çıkarma: Negatif sonuç vermeyen çıkarma işlemi oluşturulur. Çarpma: 1–9 arasındaki rakamlarla, sonucu 24'ü geçmeyen çarpma işlemi oluşturulur. Soru Seç: Arşivdeki genel kültür ve temel matematik sorularından biri seçilir. Süre dolduğunda ilgili hedefin veya sorunun doğru cevabı gösterilir.
+- `index.html` — Mevcut tek oyunculu oyun + çok oyunculu lobi
+- `multiplayer.js` — Oda oluşturma/katılma, oda durumu, oyuncu listesi, tahta kaydetme ve sonuç gönderme
+- `database.sql` — Supabase tabloları ve RPC fonksiyonları
+- `README.md` — Kurulum talimatları
 
-🧩 Oyun kuralları Oyun tahtası 5 sütun ve 5 satırdan oluşur. Parçalar sürüklenerek tahtaya yerleştirilir. Parçalar birbiriyle çakışamaz ve tahta sınırlarının dışına taşamaz. Yerleştirilen parçalar yeniden taşınabilir. Parçalar çöp kutusuna bırakılarak tahtadan kaldırılabilir. Oyuncu, boş kalan hücrenin numarasını seçerek Kontrol et düğmesine basar. Merkez hücre boş kaldığında cevap Numarasız merkez olarak seçilir. Doğru cevapta başarı, yanlış cevapta yeniden deneme mesajı gösterilir.
+## Çok oyunculu özellikler
 
-🚀 Kurulum Oyun herhangi bir paket yöneticisi veya derleme işlemi gerektirmez. Bu depoyu bilgisayarınıza indirin veya klonlayın. index.html dosyasını bir web tarayıcısında açın. Oyunu oynamaya başlayın. git clone REPOSITORY_URL
+- 2–4 oyunculu oda; oda koduyla katılma
+- Oda sahibinin tur başlatması
+- Her oyuncunun kendi tahtasında oynaması
+- Oyuncu tahtasının hamlelerde Supabase'e kaydedilmesi
+- Sunucu saatine bağlı ortak başlangıç zamanı ve 2/3/5 dakikalık sayaç
+- Sunucu tarafında 25 hücre, taşma, çakışma ve boş hücre cevabı kontrolü
+- İlk geçerli cevabın kazanan olarak kaydedilmesi
+- Oda oyuncularının ve kazananın yaklaşık 1,8 saniyede bir yenilenmesi
 
+## Kurulum
 
+### 1. Supabase projesi oluşturun
 
-REPOSITORY_URL yerine kendi GitHub depo adresinizi yazın.
+Supabase hesabınızda yeni bir proje oluşturun. Projenin `Project URL` ve `anon` / `publishable` anahtarını alın.
 
-🖼️ Logo ekleme Oyun tahtasının merkezinde özel bir logo göstermek için: Logo dosyanızı logo.png adıyla kaydedin. logo.png dosyasını index.html ile aynı klasöre koyun. Oyunu yeniden açın. Logo bulunamazsa merkez hücrede varsayılan ❖ simgesi gösterilir. Bu simge için ayrıca bir görsel dosyası gerekmez. 🛠️ Kullanılan teknolojiler HTML5 CSS3 JavaScript
+### 2. Veritabanını kurun
 
-Harici JavaScript kütüphanesi veya kurulum gerektirmeden tarayıcıda çalışacak şekilde tasarlanmıştır.
+Supabase panelinde **SQL Editor** bölümünü açın. Bu paketteki `database.sql` dosyasının tamamını yapıştırıp çalıştırın.
 
-🎯 Eğitimsel kazanımlar
+Bu SQL, odalar ve oyuncular tablolarını, doğrudan tablo erişimini kapatan RLS ayarlarını ve uygulamanın kullandığı RPC fonksiyonlarını oluşturur.
 
-Mantıksal düşünme ve problem çözme
+### 3. Bağlantı bilgilerini girin
 
-Geometrik şekilleri tanıma ve uzamsal algı
+`index.html` dosyasını web sunucusu üzerinden açın (aşağıdaki yerel test bölümüne bakın). **Çok oyunculu** düğmesine basın ve şunları girin:
 
-Döndürme ve simetri ilişkilerini kavrama
+- Supabase Project URL
+- Anon / publishable key
 
-Sayılar ve temel matematik işlemleriyle çalışma
+**Bağlantıyı kaydet** düğmesine basın. Bilgiler yalnızca o tarayıcının `localStorage` alanında saklanır. `service_role` anahtarını kesinlikle kullanmayın.
 
-Zaman yönetimi ve dikkat geliştirme
+### 4. Oyuncularla deneyin
 
-📄 Lisans
+1. İlk cihazda **Oda oluştur** seçeneğine basın.
+2. Oluşan 6 karakterli kodu diğer oyunculara gönderin.
+3. Diğer cihazlarda aynı URL'yi açıp kodla katılın.
+4. En az iki oyuncu odadayken oda sahibi **Turu başlat** seçeneğine basar.
+5. Her oyuncu kendi tahtasını tamamlar, boş hücre cevabını seçer ve **Kontrol et** düğmesine basar. Doğru cevap veritabanına gönderildiğinde ilk geçerli sonuç kazanan olur.
 
-Bu projeye ait lisans koşulları henüz belirtilmemiştir. Projeyi GitHub üzerinden paylaşmadan önce uygun bir lisans ekleyebilirsiniz.
+## Yerel test
 
-Sihirli Sayılar — Düşün, yerleştir, keşfet!
+Tarayıcı güvenlik ayarları nedeniyle `file://` üzerinden açmak yerine yerel HTTP sunucusu kullanın. Python kuruluysa proje klasöründe:
+
+```bash
+python -m http.server 8000
+```
+
+Sonra `http://localhost:8000` adresini açın. İnternet üzerinden test etmek için klasörü HTTPS destekleyen statik bir barındırma hizmetine yükleyin. `index.html`, `multiplayer.js` ve (kurulum için) `database.sql` dosyalarını birlikte saklayın.
+
+## Bilinen sınırlar
+
+- Bu, ilk çalıştırılabilir MVP'dir; oda listesi, hesap sistemi, sohbet, turnuva geçmişi ve yeniden bağlanınca tahtayı otomatik geri yükleme henüz yoktur.
+- Oyuncu kimliği sekme oturumunda saklanır. Sekme tamamen kapanırsa aynı oyuncu oturumu devam etmeyebilir.
+- Tur sorusu şu an çok oyunculu modda “Boş hücrenin numarasını bul” olarak sabitlenmiştir. Tek oyunculu zar menüsündeki tüm yöntemler korunur ancak çok oyunculu turda henüz seçim ekranına bağlanmamıştır.
+- Sunucu, yerleşim koordinatlarının sınırlarını, hücre çakışmalarını, toplam 24 dolu hücreyi ve gönderilen boş hücre cevabını doğrular. İleri seviye hile önleme için parça şekillerinin sunucu tarafında sabit tanımlarla doğrulanması ve kullanıcı kimlik doğrulaması sonraki aşamada eklenmelidir.
+- Aynı anda gelen sonuçlarda veritabanındaki oda satırı kilitlenerek ilk geçerli gönderim kazanan olarak kaydedilir.
+
+## Güvenlik
+
+`anon` / `publishable` anahtarı tarayıcıda kullanılmak üzere tasarlanmıştır; yetkiler RLS ve RPC fonksiyonlarıyla sınırlanmalıdır. `service_role` veya başka bir gizli anahtarı istemci koduna koymayın. SQL'i yalnızca kendi Supabase projenizde çalıştırın.
+
+## Teknolojiler
+
+HTML, CSS, JavaScript, Supabase Postgres ve Supabase RPC.

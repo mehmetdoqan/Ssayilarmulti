@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f3f6fc">
+<title>Sihirli Sayılar</title>
+<style>
+:root{--bg:#f3f6fc;--ink:#263550;--blue:#4777ee;--line:#dce4f0;--gap:5px}
+*{box-sizing:border-box}body{margin:0;padding:14px;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+button,select{font:inherit}button{touch-action:manipulation;cursor:pointer}.app{max-width:1050px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#4777ee,#9560df);display:grid;place-items:center;color:white;font-size:27px;flex-shrink:0}
+h1{font-size:clamp(24px,4vw,35px);margin:0;letter-spacing:-1px}h2{font-size:17px;margin:0 0 14px}.sub,.hint{color:#72809a;font-size:13px;line-height:1.5}
+.header-actions{display:flex;align-items:center;gap:8px}.dice-button{width:48px;height:48px;border:1px solid #dbe3f1;border-radius:15px;background:#fff;font-size:27px;box-shadow:0 5px 16px #26355012}
+.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}
+.panel{background:white;border:1px solid #e2e8f2;border-radius:20px;padding:16px;min-width:0;box-shadow:0 7px 25px #2635500b}
+.board{width:min(100%,440px);aspect-ratio:1;margin:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:var(--gap);touch-action:none;user-select:none}
+.cell{position:relative;display:grid;place-items:center;min-width:0;min-height:0;padding:0;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#f0f4fa;color:#50617d;font-size:clamp(13px,3vw,20px);font-weight:750;touch-action:none;user-select:none}
+.cell.center{background:#e7edff;border-color:#91adff}.cell.center:after{content:"";display:none}.center-logo{position:absolute;z-index:3;width:72%;height:72%;object-fit:contain;pointer-events:none;border-radius:7px}.center-fallback{position:absolute;z-index:3;width:78%;height:78%;display:grid;place-items:center;pointer-events:none;font-size:clamp(25px,6vw,42px);line-height:1;color:#50617d;filter:drop-shadow(0 2px 2px #26355022)}.cell.center .number{display:none}
+.cell .block{position:absolute;inset:2px;border-radius:5px;pointer-events:none}.cell.filled .number{display:none}.cell.drag-over{outline:3px solid var(--blue);outline-offset:-3px;background:#dfe8ff}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}.stat{padding:9px 3px;text-align:center;border:1px solid #e6ebf4;background:#f7f9fd;border-radius:11px}.stat strong{display:block;font-size:19px}.stat span{font-size:11px;color:#72809a}
+.controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.btn{border:1px solid var(--line);background:white;color:var(--ink);padding:9px 11px;border-radius:10px;font-size:13px;font-weight:700}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn:disabled{opacity:.4;cursor:not-allowed}
+.pieces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{border:1px solid #e1e7f1;border-radius:13px;padding:9px;min-width:0;background:white}.card.used{opacity:.42}
+.phead{display:flex;justify-content:space-between;gap:4px;font-size:13px;font-weight:800;margin-bottom:7px}.phead small{font-weight:400;color:#72809a}
+.shape{display:grid;justify-content:center;align-content:center;gap:3px;min-height:66px;touch-action:none;user-select:none;cursor:grab}.shape-cell{width:clamp(19px,4.8vw,25px);aspect-ratio:1;border-radius:5px}.actions{display:flex;gap:5px;margin-top:7px}.actions button{flex:1;border:1px solid var(--line);border-radius:8px;background:#f8faff;padding:6px}
+.notice{margin-top:12px;padding:10px 11px;border-radius:10px;background:#f2f5fb;font-size:12px;line-height:1.5;color:#586985}.notice.error{background:#fff0ef;color:#a43b35}.notice.success{background:#e9f8ef;color:#217447}
+.answerrow{display:flex;gap:7px;margin-top:10px}.answerrow select{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:9px;background:white}
+.trash{display:none;margin:0 0 12px;padding:13px;border:2px dashed #e5a1a1;border-radius:15px;background:#fff4f4;text-align:center;color:#bd4242;font-weight:800}.trash.visible{display:block}.trash.over{background:#ffe1e1;border-color:#e04444;transform:scale(1.02)}.trash .bin{display:block;font-size:28px}
+.drag-ghost{position:fixed;z-index:99999;pointer-events:none;opacity:.94;display:grid;filter:drop-shadow(0 8px 12px #22314a35);will-change:left,top}.ghost-cell{box-sizing:border-box;border:2px solid #fff;border-radius:8px;box-shadow:inset 0 -3px 0 #00000015}
+.modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;background:#18264188;backdrop-filter:blur(5px)}.modal.show{display:flex}.modal-box{position:relative;width:min(100%,390px);padding:27px 22px 22px;border-radius:26px;background:white;text-align:center;box-shadow:0 25px 80px #14203d45;animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}.modal-art{font-size:54px;line-height:1.3;margin-bottom:7px}.modal h2{font-size:30px;margin:0 0 8px}.modal p{font-size:14px;color:#687791;line-height:1.6;margin:0 0 20px}.modal.success h2{color:#24985b}.modal.retry h2{color:#e58b32}.modal .btn{min-width:130px;padding:12px 18px}.close{position:absolute;right:12px;top:10px;border:0;background:#f1f4fa;border-radius:50%;width:32px;height:32px;font-size:18px;color:#61708a}
+.menu-modal{position:fixed;inset:0;z-index:90000;display:none;align-items:flex-start;justify-content:flex-end;padding:78px 18px 18px;background:#18264155}.menu-modal.show{display:flex}.menu-box{width:min(100%,390px);max-height:calc(100dvh - 100px);overflow:auto;background:#fff;border:1px solid #e2e8f2;border-radius:22px;padding:18px;box-shadow:0 20px 60px #14203d35;animation:pop .18s ease-out}
+.menu-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.menu-head h2{margin:0;font-size:20px}.menu-close{border:0;background:#f1f4fa;border-radius:50%;width:32px;height:32px;font-size:19px}
+.method-list{display:grid;gap:8px}.method{display:flex;align-items:center;gap:11px;width:100%;padding:12px;border:1px solid #e2e8f2;border-radius:13px;background:white;text-align:left}.method:active,.method.active{border-color:#8ba8ff;background:#f0f4ff}.method-icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:23px;flex-shrink:0}.method strong{display:block;font-size:14px}.method small{display:block;color:#72809a;font-size:11px;margin-top:3px}
+.menu-divider{height:1px;background:#e9edf5;margin:16px 0}.timer-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.timer-option{border:1px solid #dce4f0;border-radius:11px;padding:11px 3px;background:#f8faff;font-weight:800;font-size:13px}.timer-option.active{border-color:#4777ee;background:#eaf0ff;color:#365dc1}
+.challenge{display:none;margin-top:14px;padding:15px;border-radius:15px;background:#f5f7ff;border:1px solid #e1e8ff;text-align:center}.challenge.show{display:block}.challenge-label{font-size:11px;color:#71809b;font-weight:800;text-transform:uppercase;letter-spacing:1px}.challenge-value{font-size:clamp(36px,9vw,54px);font-weight:900;letter-spacing:1px;min-height:68px;display:grid;place-items:center;color:#354e9e;font-variant-numeric:tabular-nums}.challenge-value.rolling{animation:pulse .12s linear infinite}@keyframes pulse{50%{transform:scale(1.04);opacity:.7}}
+.timer-area{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:12px;border-radius:13px;background:#f7f9fd;border:1px solid #e7ecf4}.timer-display{font-size:25px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px}.timer-display.running{color:#27864c}.timer-buttons{display:flex;gap:6px}.timer-buttons .btn{padding:8px 10px}.timer-help{font-size:11px;color:#72809a;margin-top:8px}.timer-display{cursor:pointer}.timer-display:after{content:" ⤢";font-size:12px;color:#72809a;vertical-align:middle}.timer-focus{position:fixed;inset:0;z-index:95000;display:none;align-items:center;justify-content:center;padding:20px;background:#101a2dcc;backdrop-filter:blur(7px)}.timer-focus.show{display:flex}.timer-focus-card{position:relative;width:min(92vw,650px);padding:clamp(24px,6vw,54px);border:1px solid #ffffff50;border-radius:30px;background:linear-gradient(145deg,#fff,#edf3ff);box-shadow:0 30px 100px #0005;text-align:center;animation:pop .2s ease-out}.timer-focus-label{font-size:clamp(14px,3vw,22px);font-weight:800;color:#72809a;letter-spacing:2px;text-transform:uppercase}.timer-focus-challenge{font-size:clamp(30px,8vw,64px);font-weight:950;line-height:1.15;color:#354e9e;margin:12px 0 8px;min-height:1.15em;font-variant-numeric:tabular-nums}.timer-focus-challenge:empty{display:none}.timer-focus-display{font-size:clamp(76px,22vw,180px);font-weight:950;line-height:1.1;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:#263550;margin:12px 0 24px}.timer-focus-display.running{color:#27864c}.timer-focus-close{position:absolute;right:14px;top:14px;width:42px;height:42px;border:0;border-radius:50%;background:#e8edf7;color:#263550;font-size:25px}.timer-focus-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.timer-focus-actions .btn{font-size:15px;padding:12px 18px}.timer-focus-hint{margin-top:16px;color:#72809a;font-size:12px}
+
+.multiplayer-panel{display:none;margin:0 0 16px;background:#fff;border:1px solid #dce4f0;border-radius:20px;padding:16px;box-shadow:0 7px 25px #2635500b}
+.multiplayer-panel.show{display:block}.mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mp-field{display:grid;gap:5px;font-size:12px;font-weight:700;color:#586985}.mp-field input,.mp-field select{width:100%;min-width:0;border:1px solid #dce4f0;border-radius:10px;padding:10px;background:#fff;color:#263550;font:inherit;font-size:14px}
+.mp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.mp-status{margin-top:12px;padding:11px;border-radius:10px;background:#f2f5fb;color:#586985;font-size:13px;line-height:1.5;white-space:pre-line}.mp-status.error{background:#fff0ef;color:#a43b35}.mp-status.success{background:#e9f8ef;color:#217447}
+.mp-roomcode{font-size:25px;font-weight:900;letter-spacing:4px;color:#354e9e}.mp-players{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.mp-player{padding:7px 10px;border:1px solid #dce4f0;border-radius:999px;font-size:12px;background:#f8faff}.mp-player.me{border-color:#91adff;background:#eaf0ff}.mp-results{margin-top:10px;display:grid;gap:6px}.mp-result{display:flex;justify-content:space-between;gap:10px;padding:9px;border-radius:9px;background:#f7f9fd;font-size:13px}
+@media(max-width:520px){.mp-grid{grid-template-columns:1fr}.header-actions{gap:5px}.header-actions #openMultiplayer{padding:8px;font-size:11px}.multiplayer-panel{padding:12px}}
+
+@media(max-width:720px){.layout{grid-template-columns:1fr}.panel{padding:12px}.pieces{grid-template-columns:repeat(3,minmax(0,1fr))}.menu-modal{padding:72px 10px 10px}.menu-box{width:100%}}
+@media(max-width:420px){body{padding:8px}.pieces{grid-template-columns:repeat(2,minmax(0,1fr))}.board{gap:3px}.controls .btn{flex:1}.header-actions .dice-button{width:44px;height:44px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><div class="logo">✦</div><div><h1>Sihirli Sayılar</h1><div class="sub">Sayıyı keşfet, parçaları yerleştir!</div></div></div>
+  <div class="header-actions"><button class="btn" id="openMultiplayer" title="Çok oyunculu oyun">🌐 Çok oyunculu</button><button class="dice-button" id="openMenu" aria-label="Sayı ve süre menüsü" title="Sayı ve süre menüsü">🎲</button></div>
+</header>
+
+
+<section id="multiplayerPanel" class="multiplayer-panel" aria-label="Çok oyunculu oda">
+  <div class="menu-head"><h2>🌐 Çok oyunculu yarış</h2><button class="menu-close" id="closeMultiplayer" aria-label="Kapat">×</button></div>
+  <div class="hint" style="margin-bottom:12px">2–4 oyuncu aynı meydan okumayı kendi tahtasında çözer. Oda kodunu arkadaşlarınla paylaş.</div>
+  <div class="mp-grid">
+    <label class="mp-field">Oyuncu adı<input id="mpName" maxlength="24" placeholder="Adını yaz"></label>
+    <label class="mp-field">Supabase bağlantısı<select id="mpConnection"><option value="configured">Bu uygulamanın yapılandırması</option></select></label>
+  </div>
+  <div class="mp-grid" style="margin-top:10px">
+    <label class="mp-field">Supabase Project URL<input id="mpUrl" placeholder="https://....supabase.co" inputmode="url"></label>
+    <label class="mp-field">Anon / publishable key<input id="mpKey" placeholder="sb_publishable_... veya anon key"></label>
+  </div>
+  <div class="mp-actions">
+    <button class="btn primary" id="mpSaveConfig">Bağlantıyı kaydet</button>
+    <button class="btn" id="mpCreate">Oda oluştur</button>
+  </div>
+  <div class="mp-grid" style="margin-top:10px">
+    <label class="mp-field">Oda kodu<input id="mpJoinCode" maxlength="6" placeholder="Örn. A7K2QX" autocapitalize="characters"></label>
+    <label class="mp-field">Oyun süresi<select id="mpDuration"><option value="120">2 dakika</option><option value="180" selected>3 dakika</option><option value="300">5 dakika</option></select></label>
+  </div>
+  <div class="mp-actions">
+    <button class="btn" id="mpJoin">Odaya katıl</button>
+    <button class="btn primary" id="mpStart" disabled>Turu başlat</button>
+    <button class="btn" id="mpLeave" disabled>Odadan ayrıl</button>
+  </div>
+  <div id="mpRoomInfo" style="display:none;margin-top:12px">
+    <div class="hint">Oda kodu · Arkadaşlarınla paylaş</div>
+    <div id="mpRoomCode" class="mp-roomcode">------</div>
+    <div id="mpRoundPrompt" class="mp-status" style="margin-top:10px;display:none"></div>
+    <div id="mpPlayers" class="mp-players"></div>
+    <div id="mpResults" class="mp-results"></div>
+  </div>
+  <div id="mpStatus" class="mp-status">Çok oyunculu oyun için bir Supabase projesi oluşturup paketteki database.sql dosyasını çalıştırın. Bağlantı bilgileri yalnızca bu tarayıcıda saklanır.</div>
+</section>
+
+<main class="layout">
+<section class="panel">
+  <h2>Oyun tahtası · 5 × 5</h2>
+  <div id="board" class="board"></div>
+  <div class="stats">
+    <div class="stat"><strong id="placed">0/6</strong><span>Yerleştirilen</span></div>
+    <div class="stat"><strong id="covered">0/24</strong><span>Dolu hücre</span></div>
+    <div class="stat"><strong id="empty">25</strong><span>Boş hücre</span></div>
+  </div>
+  <div class="controls">
+    <button class="btn" id="rotate">↻ Döndür</button><button class="btn" id="flip">↔ Aynala</button><button class="btn" id="undo">↶ Geri al</button><button class="btn" id="reset">⟲ Sıfırla</button>
+  </div>
+  <div class="notice" id="boardNotice">Bir parçayı basılı tutup tahtaya sürükleyin. Tahtadaki parçaları da sürükleyerek taşıyabilirsiniz.</div>
+</section>
+
+<section class="panel">
+  <h2>Parçaların</h2>
+  <div class="hint" style="margin-bottom:12px">Her parça yalnızca bir kez kullanılabilir.</div>
+  <div id="trash" class="trash"><span class="bin">🗑️</span>ÇÖP KUTUSU<div style="font-size:11px;font-weight:500">Parçayı buraya bırakıp tahtadan kaldır.</div></div>
+  <div id="pieces" class="pieces"></div>
+  <h2 style="margin-top:22px">Boş hücrenin numarası?</h2>
+  <div class="hint">Tüm parçaları yerleştirdikten sonra boş kalan hücreyi seç.</div>
+  <div class="answerrow"><select id="answer"><option value="">Numara seçin…</option></select><button class="btn primary" id="check">Kontrol et</button></div>
+  <div class="notice" id="answerNotice">Merkez hücre de doldurulabilir. Boş kalırsa “Numarasız merkez” cevabını seç.</div>
+</section>
+</main>
+</div>
+
+<div id="menuModal" class="menu-modal" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+  <div class="menu-box">
+    <div class="menu-head"><h2 id="menuTitle">🎲 Sayı meydan okuması</h2><button class="menu-close" id="closeMenu" aria-label="Menüyü kapat">×</button></div>
+    <div class="hint" style="margin-bottom:12px">Bir sayı yöntemi seç. İşlem sonucunu ekranda göstermeden bulmaya çalış!</div>
+    <div class="method-list">
+      <button class="method" data-method="random"><span class="method-icon" style="background:#e9efff">🎲</span><span><strong>1. Rastgele sayı seç</strong><small>1–24 arasında bir sayı belirle.</small></span></button>
+      <button class="method" data-method="add"><span class="method-icon" style="background:#e5f7eb">➕</span><span><strong>2. Toplama seç</strong><small>İki rakamı topla. Sonuç gizli kalır.</small></span></button>
+      <button class="method" data-method="subtract"><span class="method-icon" style="background:#fff0df">➖</span><span><strong>3. Çıkarma seç</strong><small>İki rakamın farkını bul. Negatif sonuç yok.</small></span></button>
+      <button class="method" data-method="multiply"><span class="method-icon" style="background:#f2e9ff">✖️</span><span><strong>4. Çarpma işlemi</strong><small>1–9 rakamları kullanılır; sonuç 24’ü geçmez.</small></span></button>
+      <button class="method" data-method="question"><span class="method-icon" style="background:#fff4c9">❓</span><span><strong>5. Soru Seç</strong><small>Soru arşivinden bir soru seç.</small></span></button>
+      <button class="method" data-method="later" disabled style="opacity:.45"><span class="method-icon" style="background:#f0f2f6">6️⃣</span><span><strong>6. Yeni yöntem</strong><small>Daha sonra eklenecek.</small></span></button>
+    </div>
+    <div id="challenge" class="challenge">
+      <div class="challenge-label" id="challengeLabel">Hedef sayı</div>
+      <div class="challenge-value" id="challengeValue">—</div>
+      <div class="hint" id="challengeHint">Hazır olduğunda süreyi başlat.</div>
+      <button class="btn primary" id="newChallenge" style="margin-top:8px">Yeni sayı / işlem</button>
+    </div>
+    <div class="menu-divider"></div>
+    <h2 style="margin-bottom:8px">⏱️ Süre seç</h2>
+    <div class="hint" style="margin-bottom:10px">Bir süre seçip başlat. Süre dolunca uyarı gösterilir.</div>
+    <div class="timer-options">
+      <button class="timer-option" data-seconds="300">5 dakika</button>
+      <button class="timer-option active" data-seconds="180">3 dakika</button>
+      <button class="timer-option" data-seconds="120">2 dakika</button>
+    </div>
+    <div class="timer-area">
+      <div><div class="hint">Kalan süre</div><div class="timer-display" id="timerDisplay">03:00</div></div>
+      <div class="timer-buttons"><button class="btn primary" id="timerStart">Başlat</button><button class="btn" id="timerReset">Sıfırla</button></div>
+    </div>
+    <div class="timer-help">Süre seçimi değiştirildiğinde sayaç yeni süreye hazırlanır.</div>
+  </div>
+</div>
+
+<div id="timerFocus" class="timer-focus" role="dialog" aria-modal="true" aria-label="Büyük geri sayım">
+  <div class="timer-focus-card">
+    <button id="timerFocusClose" class="timer-focus-close" aria-label="Büyük sayacı kapat">×</button>
+    <div id="timerFocusChallenge" class="timer-focus-challenge" aria-live="polite"></div>
+    <div class="timer-focus-label">⏱️ Kalan süre</div>
+    <div id="timerFocusDisplay" class="timer-focus-display">03:00</div>
+    <div class="timer-focus-actions"><button class="btn primary" id="timerFocusStart">Başlat</button><button class="btn" id="timerFocusReset">Sıfırla</button></div>
+    <div class="timer-focus-hint">Küçük sayaç köşedeki menüde görünmeye devam eder.</div>
+  </div>
+</div>
+
+<div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+  <div id="modalBox" class="modal-box">
+    <button id="closeResult" class="close" aria-label="Kapat">×</button>
+    <div id="modalArt" class="modal-art">🌟</div><h2 id="resultTitle">Başardın!</h2><p id="resultText"></p><button id="modalAction" class="btn primary">Devam et</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const COLORS={Z:"#3985e8",Kare:"#e34e52",P:"#9257d8",T:"#38a66a",I:"#b07c4f",L:"#e3a32c"};
+const INITIAL={
+ Z:[[0,0],[0,1],[1,1],[1,2]],Kare:[[0,0],[0,1],[1,0],[1,1]],
+ P:[[0,0],[0,1],[1,0],[1,1],[2,0]],T:[[0,0],[0,1],[0,2],[1,1]],
+ I:[[0,0],[1,0],[2,0]],L:[[0,0],[1,0],[2,0],[2,1]]
+};
+const names=Object.keys(INITIAL),board=document.querySelector("#board"),piecesEl=document.querySelector("#pieces"),trash=document.querySelector("#trash"),answer=document.querySelector("#answer");
+let pieces={},selected=null,history=[],drag=null,ghost=null;
+let chosenSeconds=180,remainingSeconds=180,timerInterval=null,timerRunning=false,currentMethod=null,currentChallenge=null,rollInterval=null;
+const copy=x=>JSON.parse(JSON.stringify(x));
+function dims(c){return{h:Math.max(...c.map(p=>p[0]))+1,w:Math.max(...c.map(p=>p[1]))+1}}
+function normalize(c){const mr=Math.min(...c.map(p=>p[0])),mc=Math.min(...c.map(p=>p[1]));return c.map(([r,x])=>[r-mr,x-mc]).sort((a,b)=>a[0]-b[0]||a[1]-b[1])}
+function rotate(c){return normalize(c.map(([r,x])=>[x,-r]))}
+function flip(c){return normalize(c.map(([r,x])=>[r,-x]))}
+function save(){history.push({pieces:copy(pieces),selected});if(history.length>100)history.shift()}
+function restore(){if(!history.length)return;const s=history.pop();pieces=copy(s.pieces);selected=s.selected;render()}
+function init(){
+ names.forEach(n=>pieces[n]={cells:copy(INITIAL[n]),anchor:null});
+ for(let i=0;i<25;i++){const el=document.createElement("div");el.className="cell"+(i===12?" center":"");el.dataset.index=i;el.innerHTML=i===12?'<span class="number"></span><img class="center-logo" src="logo.png" alt="Logo" draggable="false"><span class="center-fallback" aria-label="Varsayılan merkez simgesi" style="display:block;color:#50617d">❖</span>':'<span class="number"></span>';if(i===12){const logo=el.querySelector(".center-logo"),fallback=el.querySelector(".center-fallback");logo.addEventListener("load",()=>{fallback.style.display="none"});logo.addEventListener("error",()=>{logo.style.display="none";fallback.style.display="grid"});if(logo.complete&&logo.naturalWidth>0)fallback.style.display="none";}board.appendChild(el)}
+ for(let n=1;n<=24;n++)answer.add(new Option(String(n),String(n)));
+ answer.add(new Option("Numarasız merkez","center"));
+ render();updateTimerDisplay();
+}
+function makeShape(name,cells){
+ const {h,w}=dims(cells),el=document.createElement("div");el.className="shape";el.style.gridTemplateColumns=`repeat(${w},23px)`;el.style.gridTemplateRows=`repeat(${h},23px)`;
+ const set=new Set(cells.map(([r,c])=>`${r},${c}`));
+ for(let r=0;r<h;r++)for(let c=0;c<w;c++){const sq=document.createElement("div");sq.className="shape-cell";sq.dataset.r=r;sq.dataset.c=c;if(set.has(`${r},${c}`))sq.style.background=COLORS[name];else sq.style.visibility="hidden";el.appendChild(sq)}
+ return el;
+}
+function renderPieces(){
+ piecesEl.innerHTML="";
+ names.forEach(name=>{
+  const p=pieces[name],card=document.createElement("div");card.className="card"+(p.anchor?" used":"");
+  const head=document.createElement("div");head.className="phead";head.innerHTML=`<span>${name}</span><small>${p.cells.length} hücre</small>`;card.appendChild(head);
+  const shape=makeShape(name,p.cells);
+  shape.addEventListener("pointerdown",e=>{if(e.button!==undefined&&e.button!==0)return;if(pieces[name].anchor)return;const sq=e.target.closest(".shape-cell");beginDrag(e,name,sq?[+sq.dataset.r,+sq.dataset.c]:[0,0],false)});
+  card.appendChild(shape);
+  const actions=document.createElement("div");actions.className="actions";
+  [["↻","rotate","Döndür"],["↔","flip","Aynala"]].forEach(([label,kind,title])=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.title=title;b.disabled=!!p.anchor;b.addEventListener("click",()=>transform(name,kind));actions.appendChild(b)});
+  card.appendChild(actions);piecesEl.appendChild(card);
+ });
+}
+function renderBoard(){
+ [...board.children].forEach((el,i)=>{el.classList.remove("filled","drag-over");el.querySelectorAll(".block").forEach(x=>x.remove());const number=el.querySelector(".number");if(number)number.textContent=i===12?"":String(i<12?i+1:i)});
+ names.forEach(name=>{const p=pieces[name];if(!p.anchor)return;p.cells.forEach(([r,c])=>{const cell=board.children[(p.anchor.r+r)*5+p.anchor.c+c];if(!cell)return;cell.classList.add("filled");const b=document.createElement("div");b.className="block";b.style.background=COLORS[name];cell.appendChild(b)})});
+}
+function updateStats(){
+ const count=names.filter(n=>pieces[n].anchor).length,covered=names.reduce((s,n)=>s+(pieces[n].anchor?pieces[n].cells.length:0),0);
+ document.querySelector("#placed").textContent=`${count}/6`;document.querySelector("#covered").textContent=`${covered}/24`;document.querySelector("#empty").textContent=String(25-covered);
+ document.querySelector("#undo").disabled=!history.length;document.querySelector("#rotate").disabled=!selected||!!pieces[selected].anchor;document.querySelector("#flip").disabled=!selected||!!pieces[selected].anchor;
+}
+function render(){renderBoard();renderPieces();updateStats();if(window.SihirliSayiGame&&window.SihirliSayiGame.onChange)window.SihirliSayiGame.onChange()}
+function pieceAt(i){for(const n of names){const p=pieces[n];if(!p.anchor)continue;for(const [r,c] of p.cells)if((p.anchor.r+r)*5+p.anchor.c+c===i)return n}return null}
+function fits(name,anchor,cells){
+ const occupied=new Set();for(const other of names){if(other===name||!pieces[other].anchor)continue;const p=pieces[other];p.cells.forEach(([r,c])=>occupied.add((p.anchor.r+r)*5+p.anchor.c+c))}
+ return cells.every(([r,c])=>{const rr=anchor.r+r,cc=anchor.c+c;return rr>=0&&rr<5&&cc>=0&&cc<5&&!occupied.has(rr*5+cc)})
+}
+function message(text,type=""){const el=document.querySelector("#boardNotice");el.textContent=text;el.className="notice "+type}
+function transform(name,kind){if(!name||pieces[name].anchor)return;save();pieces[name].cells=kind==="rotate"?rotate(pieces[name].cells):flip(pieces[name].cells);selected=name;render();message(`${name} parçası ${kind==="rotate"?"döndürüldü":"aynalandı"}.`)}
+function makeGhost(name){
+ if(ghost)ghost.remove();const p=pieces[name],{h,w}=dims(p.cells),size=board.children[0].getBoundingClientRect().width,gap=parseFloat(getComputedStyle(board).columnGap)||0;
+ ghost=document.createElement("div");ghost.className="drag-ghost";ghost.style.gridTemplateColumns=`repeat(${w},${size}px)`;ghost.style.gridTemplateRows=`repeat(${h},${size}px)`;ghost.style.gap=`${gap}px`;
+ const set=new Set(p.cells.map(([r,c])=>`${r},${c}`));for(let r=0;r<h;r++)for(let c=0;c<w;c++){const sq=document.createElement("div");sq.style.width=`${size}px`;sq.style.height=`${size}px`;if(set.has(`${r},${c}`)){sq.className="ghost-cell";sq.style.background=COLORS[name]}else sq.style.visibility="hidden";ghost.appendChild(sq)}document.body.appendChild(ghost);
+}
+function moveGhost(x,y){if(!ghost||!drag)return;const size=board.children[0].getBoundingClientRect().width,gap=parseFloat(getComputedStyle(board).columnGap)||0,[r,c]=drag.offset;ghost.style.left=`${x-c*(size+gap)-size/2}px`;ghost.style.top=`${y-r*(size+gap)-size/2}px`}
+function beginDrag(e,name,offset,fromBoard=true){
+ e.preventDefault();if(drag)return;const p=pieces[name];drag={name,offset,fromBoard,oldAnchor:p.anchor?copy(p.anchor):null,startX:e.clientX,startY:e.clientY,moved:false};
+ selected=name;makeGhost(name);moveGhost(e.clientX,e.clientY);trash.classList.toggle("visible",!!p.anchor);
+ document.addEventListener("pointermove",pointerMove,{passive:false});document.addEventListener("pointerup",pointerUp,{passive:false});document.addEventListener("pointercancel",pointerCancel);
+}
+function pointerMove(e){
+ if(!drag)return;e.preventDefault();if(Math.abs(e.clientX-drag.startX)+Math.abs(e.clientY-drag.startY)>4)drag.moved=true;moveGhost(e.clientX,e.clientY);
+ board.querySelectorAll(".drag-over").forEach(el=>el.classList.remove("drag-over"));trash.classList.remove("over");
+ const target=document.elementFromPoint(e.clientX,e.clientY),cell=target?.closest(".cell");if(cell)cell.classList.add("drag-over");if(drag.fromBoard&&target?.closest("#trash"))trash.classList.add("over");
+}
+function cleanupDrag(){
+ document.removeEventListener("pointermove",pointerMove);document.removeEventListener("pointerup",pointerUp);document.removeEventListener("pointercancel",pointerCancel);
+ board.querySelectorAll(".drag-over").forEach(el=>el.classList.remove("drag-over"));trash.classList.remove("over","visible");if(ghost){ghost.remove();ghost=null}
+}
+function pointerCancel(){if(!drag)return;const d=drag;drag=null;cleanupDrag();if(d.oldAnchor)pieces[d.name].anchor=d.oldAnchor;render()}
+function pointerUp(e){
+ if(!drag)return;e.preventDefault();const d=drag,target=document.elementFromPoint(e.clientX,e.clientY),targetCell=target?.closest(".cell"),onTrash=!!target?.closest("#trash");drag=null;cleanupDrag();
+ if(!d.moved){render();return}
+ if(d.fromBoard&&onTrash){save();pieces[d.name].anchor=null;selected=null;render();message(`${d.name} parçası kaldırıldı ve parçalar alanına geri döndü.`);return}
+ if(!targetCell){if(d.oldAnchor)pieces[d.name].anchor=d.oldAnchor;render();message("Parçayı tahtaya veya çöp kutusuna bırakın.","error");return}
+ const index=+targetCell.dataset.index,anchor={r:Math.floor(index/5)-d.offset[0],c:index%5-d.offset[1]},old=copy(pieces[d.name]);pieces[d.name].anchor=null;
+ if(fits(d.name,anchor,pieces[d.name].cells)){save();pieces[d.name].anchor=anchor;selected=null;render();message(`${d.name} parçası yerleştirildi.`)}
+ else{pieces[d.name]=old;selected=d.name;render();message("Geçersiz yerleşim! Parçalar çakışamaz veya tahta dışına çıkamaz.","error")}
+}
+board.addEventListener("pointerdown",e=>{const cell=e.target.closest(".cell");if(!cell)return;const i=+cell.dataset.index,name=pieceAt(i);if(!name)return;const p=pieces[name],r=Math.floor(i/5),c=i%5,hit=p.cells.find(([pr,pc])=>p.anchor.r+pr===r&&p.anchor.c+pc===c);if(hit)beginDrag(e,name,[hit[0],hit[1]],true)});
+document.querySelector("#rotate").onclick=()=>transform(selected,"rotate");document.querySelector("#flip").onclick=()=>transform(selected,"flip");document.querySelector("#undo").onclick=restore;
+document.querySelector("#reset").onclick=()=>{save();names.forEach(n=>pieces[n]={cells:copy(INITIAL[n]),anchor:null});selected=null;render();message("Yeni oyun hazır.");answerMessage("Parçaları yerleştirerek başlayın.")};
+function answerMessage(text,type=""){const el=document.querySelector("#answerNotice");el.textContent=text;el.className="notice "+type}
+function showResult(success,title,text,art){const box=document.querySelector("#modalBox");box.className="modal-box "+(success?"success":"retry");document.querySelector("#resultTitle").textContent=title;document.querySelector("#resultText").textContent=text;document.querySelector("#modalArt").textContent=art;document.querySelector("#modalAction").textContent=success?"Harika!":"Yeniden dene";document.querySelector("#resultModal").classList.add("show")}
+function closeResult(){document.querySelector("#resultModal").classList.remove("show")}
+document.querySelector("#closeResult").onclick=closeResult;document.querySelector("#modalAction").onclick=closeResult;document.querySelector("#resultModal").addEventListener("click",e=>{if(e.target.id==="resultModal")closeResult()});
+document.querySelector("#check").onclick=()=>{
+ const covered=names.reduce((s,n)=>s+(pieces[n].anchor?pieces[n].cells.length:0),0);
+ if(covered!==24){showResult(false,"Tekrar Dene!","Henüz bütün parçalar yerleşmedi. Altı parçayı da tahtaya yerleştirmeyi dene.","🧩");return}
+ const empty=[...Array(25).keys()].find(i=>!pieceAt(i));if(empty===undefined){showResult(false,"Tekrar Dene!","Boş hücre bulunamadı.","🔎");return}
+ const actual=empty===12?"center":String(empty<12?empty+1:empty);
+ if(!answer.value)showResult(false,"Bir cevap seç!","Boş kalan hücrenin numarasını seç ve tekrar kontrol et.","💭");
+ else if(answer.value===actual)showResult(true,"Başardın!","Harika iş çıkardın! Boş hücrenin sırrını çözdün. Sen bir Sihirli Sayılar ustasısın!","🏆");
+ else showResult(false,"Tekrar Dene!","Biraz daha düşün. Parçaları yeniden düzenleyebilir ve başka bir cevap deneyebilirsin.","🌈");
+};
+
+// Zar menüsü ve sayı meydan okuması
+const menuModal=document.querySelector("#menuModal"),challenge=document.querySelector("#challenge"),challengeValue=document.querySelector("#challengeValue");
+function openMenu(){menuModal.classList.add("show")}
+function closeMenu(){menuModal.classList.remove("show")}
+document.querySelector("#openMenu").onclick=openMenu;document.querySelector("#closeMenu").onclick=closeMenu;
+menuModal.addEventListener("click",e=>{if(e.target===menuModal)closeMenu()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();closeResult()}});
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+const questionArchive=[
+ {question:"Bir hafta kaç gündür?",answer:7},
+ {question:"Bir yıl kaç aydır?",answer:12},
+ {question:"Karenin kaç köşesi vardır?",answer:4},
+ {question:"Bir gün kaç saattir?",answer:24},
+ {question:"Kaç mevsim vardır?",answer:4},
+ {question:"Mayıs yılın kaçıncı ayıdır?",answer:5}
+];
+function buildChallenge(method){
+ currentMethod=method;let value,label,hint;
+ if(method==="random"){
+  value=rand(1,24);label="Hedef sayı";hint="Bu sayıyı bulmak için puzzle üzerinde çalış!";
+  currentChallenge={answer:value,display:String(value)};
+ }else if(method==="add"){
+  const a=rand(1,9),b=rand(1,9);value=a+b;label="Toplama işlemi";hint="İşlemin sonucunu bul. Cevap süre sonunda gösterilecek.";
+  currentChallenge={answer:value,display:`${a} + ${b} = ?`};
+ }else if(method==="subtract"){
+  const a=rand(1,9),b=rand(1,9),high=Math.max(a,b),low=Math.min(a,b);value=high-low;label="Çıkarma işlemi";hint="İşlemin sonucunu bul. Negatif sonuç yok; cevap süre sonunda gösterilecek.";
+  currentChallenge={answer:value,display:`${high} − ${low} = ?`};
+ }else if(method==="multiply"){
+  let a,b;do{a=rand(1,9);b=rand(1,9)}while(a*b>24);
+  value=a*b;label="Çarpma işlemi";hint="İki rakamı çarp. Sonuç 24’ü geçmez; cevap süre sonunda gösterilecek.";
+  currentChallenge={answer:value,display:`${a} × ${b} = ?`};
+ }else if(method==="question"){
+  const item=questionArchive[rand(0,questionArchive.length-1)];label="Soru Seç";hint="Soruyu cevapla. Doğru cevap süre sonunda gösterilecek.";
+  currentChallenge={answer:item.answer,display:item.question};
+ }
+ document.querySelector("#challengeLabel").textContent=label;
+ document.querySelector("#challengeHint").textContent=hint;
+ challenge.classList.add("show");
+ if(rollInterval)clearInterval(rollInterval);
+ challengeValue.classList.add("rolling");
+ let ticks=0;rollInterval=setInterval(()=>{
+  if(method==="random")challengeValue.textContent=String(rand(1,24));
+  else if(method==="add")challengeValue.textContent=`${rand(1,9)} + ${rand(1,9)} = ?`;
+  else if(method==="subtract") {const a=rand(1,9),b=rand(1,9);challengeValue.textContent=`${Math.max(a,b)} − ${Math.min(a,b)} = ?`;}
+  else if(method==="multiply") {let a,b;do{a=rand(1,9);b=rand(1,9)}while(a*b>24);challengeValue.textContent=`${a} × ${b} = ?`;}
+  else challengeValue.textContent=questionArchive[rand(0,questionArchive.length-1)].question;
+  ticks++;
+  if(ticks>=14){clearInterval(rollInterval);rollInterval=null;challengeValue.classList.remove("rolling");challengeValue.textContent=currentChallenge.display;updateTimerDisplay()}
+ },65);
+ updateTimerDisplay();
+}
+document.querySelectorAll(".method[data-method]").forEach(btn=>btn.addEventListener("click",()=>{
+ const method=btn.dataset.method;if(method==="later")return;
+ document.querySelectorAll(".method").forEach(b=>b.classList.remove("active"));btn.classList.add("active");buildChallenge(method);
+}));
+document.querySelector("#newChallenge").onclick=()=>{if(currentMethod)buildChallenge(currentMethod)};
+document.querySelectorAll(".timer-option").forEach(btn=>btn.addEventListener("click",()=>{
+ chosenSeconds=+btn.dataset.seconds;remainingSeconds=chosenSeconds;
+ document.querySelectorAll(".timer-option").forEach(b=>b.classList.toggle("active",b===btn));
+ stopTimer();updateTimerDisplay();
+}));
+function updateTimerDisplay(){
+ const m=Math.floor(remainingSeconds/60),s=remainingSeconds%60;
+ const value=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+ const el=document.querySelector("#timerDisplay"),focusEl=document.querySelector("#timerFocusDisplay");
+ el.textContent=value;focusEl.textContent=value;el.classList.toggle("running",timerRunning);focusEl.classList.toggle("running",timerRunning);
+ const focusChallenge=document.querySelector("#timerFocusChallenge");
+ focusChallenge.textContent=currentChallenge ? currentChallenge.display : "";
+ const startLabel=timerRunning?"Duraklat":"Başlat";
+ document.querySelector("#timerStart").textContent=startLabel;document.querySelector("#timerFocusStart").textContent=startLabel;
+}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null}timerRunning=false}
+function timerTick(){
+ if(remainingSeconds>0){remainingSeconds--;updateTimerDisplay()}
+ if(remainingSeconds<=0){
+  stopTimer();updateTimerDisplay();
+  const challengeText=currentChallenge?.display||"";
+  const answerText=currentChallenge?.answer;
+  const detail=answerText!==undefined
+   ? `${challengeText}\nDoğru cevap: ${answerText}`
+   : "Süre tamamlandı. Yeni bir tur başlatabilirsin.";
+  showResult(false,"Süre doldu!",detail,"⏰");
+ }
+}
+document.querySelector("#timerStart").onclick=()=>{
+ if(timerRunning){stopTimer();updateTimerDisplay();return}
+ if(remainingSeconds<=0)remainingSeconds=chosenSeconds;
+ timerRunning=true;updateTimerDisplay();timerInterval=setInterval(timerTick,1000);
+};
+document.querySelector("#timerReset").onclick=()=>{stopTimer();remainingSeconds=chosenSeconds;updateTimerDisplay()};
+const timerFocus=document.querySelector("#timerFocus");
+function openTimerFocus(){timerFocus.classList.add("show");updateTimerDisplay()}
+function closeTimerFocus(){timerFocus.classList.remove("show")}
+document.querySelector("#timerDisplay").addEventListener("click",openTimerFocus);
+document.querySelector("#timerFocusClose").addEventListener("click",closeTimerFocus);
+timerFocus.addEventListener("click",e=>{if(e.target===timerFocus)closeTimerFocus()});
+document.querySelector("#timerFocusStart").onclick=()=>document.querySelector("#timerStart").click();
+document.querySelector("#timerFocusReset").onclick=()=>document.querySelector("#timerReset").click();
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTimerFocus()});
+init();
+window.SihirliSayiGame={
+ getState:()=>({pieces:copy(pieces),answer:answer.value,selected}),
+ setState:(state)=>{if(state&&state.pieces){pieces=copy(state.pieces);selected=state.selected||null;render()}},
+ getAnswer:()=>answer.value,
+ getCorrectEmpty:()=>{const covered=names.reduce((s,n)=>s+(pieces[n].anchor?pieces[n].cells.length:0),0);if(covered!==24)return null;const empty=[...Array(25).keys()].find(i=>!pieceAt(i));return empty===undefined?null:(empty===12?"center":String(empty<12?empty+1:empty))},
+ isSolved:()=>{const actual=window.SihirliSayiGame.getCorrectEmpty();return !!actual&&answer.value===actual},
+ startMultiplayerTimer:(duration,startAt)=>{stopTimer();chosenSeconds=duration;remainingSeconds=Math.max(0,duration-Math.floor((Date.now()-startAt)/1000));document.querySelectorAll(".timer-option").forEach(b=>b.classList.toggle("active",+b.dataset.seconds===duration));updateTimerDisplay();if(remainingSeconds>0){timerRunning=true;updateTimerDisplay();timerInterval=setInterval(timerTick,1000)}},
+ onChange:null
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="multiplayer.js"></script>
+</body>
+</html>
