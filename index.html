@@ -41,7 +41,7 @@ h1{font-size:clamp(24px,4vw,35px);margin:0;letter-spacing:-1px}h2{font-size:17px
 .multiplayer-panel.show{display:block}.mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .mp-field{display:grid;gap:5px;font-size:12px;font-weight:700;color:#586985}.mp-field input,.mp-field select{width:100%;min-width:0;border:1px solid #dce4f0;border-radius:10px;padding:10px;background:#fff;color:#263550;font:inherit;font-size:14px}
 .mp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.mp-status{margin-top:12px;padding:11px;border-radius:10px;background:#f2f5fb;color:#586985;font-size:13px;line-height:1.5;white-space:pre-line}.mp-status.error{background:#fff0ef;color:#a43b35}.mp-status.success{background:#e9f8ef;color:#217447}
-.mp-roomcode{font-size:25px;font-weight:900;letter-spacing:4px;color:#354e9e}.mp-players{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.mp-player{padding:7px 10px;border:1px solid #dce4f0;border-radius:999px;font-size:12px;background:#f8faff}.mp-player.me{border-color:#91adff;background:#eaf0ff}.mp-results{margin-top:10px;display:grid;gap:6px}.mp-result{display:flex;justify-content:space-between;gap:10px;padding:9px;border-radius:9px;background:#f7f9fd;font-size:13px}
+.mp-roomcode{font-size:25px;font-weight:900;letter-spacing:4px;color:#354e9e}.mp-target{margin-top:10px;padding:13px;border-radius:12px;background:#eef3ff;color:#354e9e;text-align:center;font-weight:850}.mp-target strong{display:block;font-size:34px;line-height:1.2;margin-top:4px}.mp-countdown{position:fixed;inset:0;z-index:110000;display:none;align-items:center;justify-content:center;background:#182641d9;color:#fff;text-align:center}.mp-countdown.show{display:flex}.mp-countdown-inner{font-weight:950;font-size:clamp(64px,18vw,150px);text-shadow:0 8px 35px #0005}.mp-countdown small{display:block;font-size:clamp(16px,4vw,26px);letter-spacing:2px}.mp-players{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.mp-player{padding:7px 10px;border:1px solid #dce4f0;border-radius:999px;font-size:12px;background:#f8faff}.mp-player.me{border-color:#91adff;background:#eaf0ff}.mp-results{margin-top:10px;display:grid;gap:6px}.mp-result{display:flex;justify-content:space-between;gap:10px;padding:9px;border-radius:9px;background:#f7f9fd;font-size:13px}
 @media(max-width:520px){.mp-grid{grid-template-columns:1fr}.header-actions{gap:5px}.header-actions #openMultiplayer{padding:8px;font-size:11px}.multiplayer-panel{padding:12px}}
 
 @media(max-width:720px){.layout{grid-template-columns:1fr}.panel{padding:12px}.pieces{grid-template-columns:repeat(3,minmax(0,1fr))}.menu-modal{padding:72px 10px 10px}.menu-box{width:100%}}
@@ -77,6 +77,7 @@ h1{font-size:clamp(24px,4vw,35px);margin:0;letter-spacing:-1px}h2{font-size:17px
   </div>
   <div class="mp-actions">
     <button class="btn" id="mpJoin">Odaya katıl</button>
+    <button class="btn" id="mpPickNumber" disabled>🎲 Rastgele sayı seç</button>
     <button class="btn primary" id="mpStart" disabled>Turu başlat</button>
     <button class="btn" id="mpLeave" disabled>Odadan ayrıl</button>
   </div>
@@ -87,7 +88,7 @@ h1{font-size:clamp(24px,4vw,35px);margin:0;letter-spacing:-1px}h2{font-size:17px
     <div id="mpPlayers" class="mp-players"></div>
     <div id="mpResults" class="mp-results"></div>
   </div>
-  <div id="mpStatus" class="mp-status">Çok oyunculu oyun için bir Supabase projesi oluşturup paketteki database.sql dosyasını çalıştırın. Bağlantı bilgileri yalnızca bu tarayıcıda saklanır.</div>
+  <div id="mpStatus" class="mp-status">Bağlantı otomatik yapılandırılmıştır. Oda oluşturabilir veya arkadaşınızın oda koduyla katılabilirsiniz.</div>
 </section>
 
 <main class="layout">
@@ -152,6 +153,7 @@ h1{font-size:clamp(24px,4vw,35px);margin:0;letter-spacing:-1px}h2{font-size:17px
   </div>
 </div>
 
+<div id="mpCountdown" class="mp-countdown" aria-live="assertive"><div class="mp-countdown-inner"><small>HAZIR OL</small><span id="mpCountdownValue">3</span></div></div>
 <div id="timerFocus" class="timer-focus" role="dialog" aria-modal="true" aria-label="Büyük geri sayım">
   <div class="timer-focus-card">
     <button id="timerFocusClose" class="timer-focus-close" aria-label="Büyük sayacı kapat">×</button>
